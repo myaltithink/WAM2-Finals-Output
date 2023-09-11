@@ -1,9 +1,13 @@
 package wam2.finals.filevault;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout codes, buttons;
 
     private String[] inputCodes = {"*", "*", "*", "*"};
+    private int hasCodes = 0;
+
+    private DatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +31,25 @@ public class MainActivity extends AppCompatActivity {
 
         codes = findViewById(R.id.codes);
         buttons = findViewById(R.id.buttons);
+        db = new DatabaseHandler(MainActivity.this);
+
+        if (!db.hasPinRegistered()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Vault Pin Setup");
+            final View dialogView = getLayoutInflater().inflate(R.layout.setup_pin, null);
+            builder.setView(dialogView);
+
+            builder.setPositiveButton("Submit", (dialog, which) -> {
+                EditText pin = dialogView.findViewById(R.id.pin_setup);
+                if (db.insertNewCode(pin.getText().toString())){
+                    Toast.makeText(MainActivity.this, pin.getText().toString() + " has been registered as the vault pin", Toast.LENGTH_LONG).show();
+                }else {
+                    Toast.makeText(MainActivity.this, "Could not set the pin as the vault pin", Toast.LENGTH_LONG).show();
+                }
+            });
+            builder.create().show();
+        }
+
 
         for (int i = 0; i < buttons.getChildCount(); i++) {
             LinearLayout buttonContainers = (LinearLayout) buttons.getChildAt(i);
@@ -33,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     button.setOnClickListener(v -> {
                         registerInput(button.getText().toString());
                         updateDisplayCode();
+                        checkVaultCode();
                     });
                 }catch (ClassCastException e){
                     ImageButton button = (ImageButton) buttonContainers.getChildAt(j);
@@ -43,6 +70,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void checkVaultCode(){
+        if (hasCodes == inputCodes.length){
+            if (db.checkVaultCode(getPins())){
+                Toast.makeText(MainActivity.this, "pin matches", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(MainActivity.this, "pin does not match", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private String getPins(){
+        StringBuilder pin = new StringBuilder();
+        for (String inputCode : inputCodes) {
+            pin.append(inputCode);
+        }
+        return pin.toString();
     }
 
     private void updateDisplayCode(){
@@ -56,16 +101,18 @@ public class MainActivity extends AppCompatActivity {
         for (int i = (inputCodes.length - 1); i >= 0 ; i--) {
             if (!inputCodes[i].equals("*")){
                 inputCodes[i] = "*";
+                hasCodes--;
                 break;
             }
         }
     }
 
     private boolean registerInput(String value){
-        if (inputCodes[3].equals("*")){
+        if (inputCodes[(inputCodes.length - 1)].equals("*")){
             for (int i = 0; i < inputCodes.length; i++) {
                 if (inputCodes[i].equals("*")){
                     inputCodes[i] = value;
+                    hasCodes++;
                     return true;
                 }
             }
