@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.io.File;
+
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "file_vault";
@@ -15,23 +17,53 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String ID_COL = "id";
     private static final String PIN_COL1 = "entry_code";
 
+    private static final String PASS_TABLE = "pass_table";
+    private static final String PASS_ID = "id";
+    private static final String PASS_FOR = "website";
+    private static final String PASS_DATA = "password_data";
+
+
     public DatabaseHandler(Context context) {
         super(context, DB_NAME, null, DB_VER);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE " + PIN_TABLE + " (" +
+        db.execSQL("CREATE TABLE " + PIN_TABLE + " (" +
                 ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                PIN_COL1 + " TEXT)";
-        Log.e("DatabaseHandler", "Creating Database");
-        db.execSQL(query);
+                PIN_COL1 + " TEXT NOT NULL)");
+
+        db.execSQL("CREATE TABLE " + PASS_TABLE + " (" +
+                PASS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                PASS_FOR + " TEXT NOT NULL," +
+                PASS_DATA + " TEXT NOT NULL)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + PIN_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + PIN_TABLE + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + PASS_TABLE + ";");
         onCreate(db);
+    }
+
+    public Cursor getAllFiles(){
+        SQLiteDatabase db = getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + PASS_FOR, null);
+    }
+
+    public boolean insertNewPass(String website, String pass){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(PASS_FOR, website);
+        cv.put(PASS_DATA, pass);
+        long res = db.insert(PASS_TABLE, null, cv);
+        return res != -1;
+    }
+
+    public void clearFileDatabase(){
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(PASS_TABLE, null, null);
+        db.close();
     }
 
     public boolean insertNewCode(String code){

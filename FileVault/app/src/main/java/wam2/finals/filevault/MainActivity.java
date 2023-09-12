@@ -3,8 +3,9 @@ package wam2.finals.filevault;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,8 +13,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +27,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        String[] perms = {"android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.MANAGE_EXTERNAL_STORAGE", "android.permission.MANAGE_DOCUMENTS"};
+
+        requestPermissions(perms, 200);
+
+        if (checkSelfPermission(perms[0]) == PackageManager.PERMISSION_DENIED || checkSelfPermission(perms[1]) == PackageManager.PERMISSION_DENIED){
+            requestPermissions(perms, 200);
+        }
 
         codes = findViewById(R.id.codes);
         buttons = findViewById(R.id.buttons);
@@ -72,12 +79,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     private void checkVaultCode(){
         if (hasCodes == inputCodes.length){
             if (db.checkVaultCode(getPins())){
-                Toast.makeText(MainActivity.this, "pin matches", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(MainActivity.this, PasswordListing.class));
             }else {
-                Toast.makeText(MainActivity.this, "pin does not match", Toast.LENGTH_LONG).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Access Denied!");
+                builder.setMessage("Given Pin did not matched");
+                builder.setNegativeButton("Close", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+                builder.create().show();
             }
         }
     }
