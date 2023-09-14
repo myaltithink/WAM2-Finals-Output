@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/setup_pin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Please register a pin for the vault\nto start using the app"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="40dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="4-digit pin"
+            android:id="@+id/pin_setup"
+            android:maxLength="4"
+            android:inputType="number"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="40dp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/update_pin"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update your pin by filling up the following"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="40dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="old 4-digit pin"
+            android:id="@+id/old_pin"
+            android:maxLength="4"
+            android:inputType="number"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="40dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="new 4-digit pin"
+            android:id="@+id/new_pin"
+            android:maxLength="4"
+            android:inputType="number"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="40dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>
